@@ -5,8 +5,8 @@
 class AuthManager {
     constructor() {
         this.currentUser = null;
-        this.usersKey = 'ticketapp_users';
         this.sessionKey = 'ticketapp_session';
+        this.apiUrl = 'http://localhost:3000/api';
         this.init();
     }
 
@@ -27,23 +27,13 @@ class AuthManager {
     }
 
     /**
-     * Criptografa a senha usando CryptoJS
-     * @param {string} password - Senha em texto puro
-     * @returns {string} - Senha criptografada
-     */
-    hashPassword(password) {
-        // Usando SHA-256 para criptografar a senha
-        return CryptoJS.SHA256(password).toString();
-    }
-
-    /**
      * Registra um novo usuário
      * @param {string} name - Nome do usuário
      * @param {string} email - Email do usuário
      * @param {string} password - Senha do usuário
-     * @returns {Object} - Resultado da operação
+     * @returns {Promise<Object>} - Resultado da operação
      */
-    register(name, email, password) {
+    async register(name, email, password) {
         if (!name || !email || !password) {
             return { success: false, message: 'Todos os campos são obrigatórios' };
         }
@@ -52,62 +42,55 @@ class AuthManager {
             return { success: false, message: 'Email inválido' };
         }
 
-        // Verifica se o email já está em uso
-        const users = this.getUsers();
-        if (users.find(user => user.email.toLowerCase() === email.toLowerCase())) {
-            return { success: false, message: 'Este email já está em uso' };
+        try {
+            const response = await fetch(`${this.apiUrl}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Erro ao registrar usuário:', error);
+            return { success: false, message: 'Erro ao conectar com o servidor' };
         }
-
-        // Cria o novo usuário
-        const newUser = {
-            id: this.generateId(),
-            name,
-            email,
-            password: this.hashPassword(password),
-            createdAt: new Date().toISOString()
-        };
-
-        // Adiciona o usuário à lista
-        users.push(newUser);
-        this.saveUsers(users);
-
-        return { success: true, message: 'Usuário registrado com sucesso' };
     }
 
     /**
      * Realiza o login do usuário
      * @param {string} email - Email do usuário
      * @param {string} password - Senha do usuário
-     * @returns {Object} - Resultado da operação
+     * @returns {Promise<Object>} - Resultado da operação
      */
-    login(email, password) {
+    async login(email, password) {
         if (!email || !password) {
             return { success: false, message: 'Email e senha são obrigatórios' };
         }
 
-        const users = this.getUsers();
-        const user = users.find(user => user.email.toLowerCase() === email.toLowerCase());
+        try {
+            const response = await fetch(`${this.apiUrl}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
 
-        if (!user) {
-            return { success: false, message: 'Usuário não encontrado' };
+            const data = await response.json();
+            
+            if (data.success) {
+                this.currentUser = data.user;
+                localStorage.setItem(this.sessionKey, JSON.stringify(data.user));
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Erro ao fazer login:', error);
+            return { success: false, message: 'Erro ao conectar com o servidor' };
         }
-
-        const hashedPassword = this.hashPassword(password);
-        if (user.password !== hashedPassword) {
-            return { success: false, message: 'Senha incorreta' };
-        }
-
-        // Cria a sessão do usuário (sem a senha)
-        const sessionUser = {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        };
-
-        this.currentUser = sessionUser;
-        localStorage.setItem(this.sessionKey, JSON.stringify(sessionUser));
-
-        return { success: true, user: sessionUser };
     }
 
     /**
@@ -135,29 +118,37 @@ class AuthManager {
     }
 
     /**
-     * Obtém todos os usuários do localStorage
-     * @returns {Array} - Lista de usuários
+     * Atualiza os dados do usuário atual
+     * @param {Object} userData - Novos dados do usuário
+     * @returns {Promise<Object>} - Resultado da operação
      */
-    getUsers() {
-        const usersData = localStorage.getItem(this.usersKey);
-        if (!usersData) {
-            return [];
+    async updateUserProfile(userData) {
+        if (!this.currentUser) {
+            return { success: false, message: 'Usuário não autenticado' };
         }
 
         try {
-            return JSON.parse(usersData);
-        } catch (e) {
-            console.error('Erro ao carregar usuários:', e);
-            return [];
-        }
-    }
+            const response = await fetch(`${this.apiUrl}/users/${this.currentUser.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
 
-    /**
-     * Salva a lista de usuários no localStorage
-     * @param {Array} users - Lista de usuários
-     */
-    saveUsers(users) {
-        localStorage.setItem(this.usersKey, JSON.stringify(users));
+            const data = await response.json();
+            
+            if (data.success) {
+                // Atualiza os dados do usuário na sessão
+                this.currentUser = { ...this.currentUser, ...userData };
+                localStorage.setItem(this.sessionKey, JSON.stringify(this.currentUser));
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Erro ao atualizar perfil:', error);
+            return { success: false, message: 'Erro ao conectar com o servidor' };
+        }
     }
 
     /**
@@ -168,14 +159,6 @@ class AuthManager {
     isValidEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
-    }
-
-    /**
-     * Gera um ID único
-     * @returns {string} - ID único
-     */
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 }
 

@@ -6,54 +6,96 @@ class DashboardManager {
     constructor() {
         this.statusChart = null;
         this.priorityChart = null;
+        this.apiUrl = 'http://localhost:3000/api';
     }
 
     /**
      * Inicializa o dashboard
-     * @param {Array} tickets - Lista de tickets do usuário
+     * @param {string} userId - ID do usuário
      */
-    initialize(tickets) {
-        this.updateStatistics(tickets);
-        this.createCharts(tickets);
+    async initialize(userId) {
+        if (!userId) {
+            console.error('ID do usuário é obrigatório para inicializar o dashboard');
+            return;
+        }
+        
+        try {
+            const dashboardData = await this.fetchDashboardData(userId);
+            this.updateStatistics(dashboardData);
+            this.createCharts(dashboardData);
+        } catch (error) {
+            console.error('Erro ao inicializar dashboard:', error);
+        }
+    }
+
+    /**
+     * Busca os dados do dashboard no servidor
+     * @param {string} userId - ID do usuário
+     * @returns {Promise<Object>} - Dados do dashboard
+     */
+    async fetchDashboardData(userId) {
+        try {
+            const response = await fetch(`${this.apiUrl}/dashboard/${userId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.dashboard;
+            } else {
+                console.error('Erro ao buscar dados do dashboard:', data.message);
+                return {
+                    totalTickets: 0,
+                    resolvedToday: 0,
+                    resolvedWeek: 0,
+                    resolvedMonth: 0,
+                    statusCounts: { open: 0, 'in-progress': 0, resolved: 0 },
+                    priorityCounts: { low: 0, medium: 0, high: 0 }
+                };
+            }
+        } catch (error) {
+            console.error('Erro ao buscar dados do dashboard:', error);
+            return {
+                totalTickets: 0,
+                resolvedToday: 0,
+                resolvedWeek: 0,
+                resolvedMonth: 0,
+                statusCounts: { open: 0, 'in-progress': 0, resolved: 0 },
+                priorityCounts: { low: 0, medium: 0, high: 0 }
+            };
+        }
     }
 
     /**
      * Atualiza as estatísticas do dashboard
-     * @param {Array} tickets - Lista de tickets do usuário
+     * @param {Object} dashboardData - Dados do dashboard
      */
-    updateStatistics(tickets) {
+    updateStatistics(dashboardData) {
         // Total de tickets
-        document.getElementById('total-tickets').textContent = tickets.length;
+        document.getElementById('total-tickets').textContent = dashboardData.totalTickets;
 
         // Tickets resolvidos hoje
-        const resolvedToday = ticketManager.getResolvedToday(tickets);
-        document.getElementById('resolved-today').textContent = resolvedToday.length;
+        document.getElementById('resolved-today').textContent = dashboardData.resolvedToday;
 
         // Tickets resolvidos na semana
-        const resolvedWeek = ticketManager.getResolvedThisWeek(tickets);
-        document.getElementById('resolved-week').textContent = resolvedWeek.length;
+        document.getElementById('resolved-week').textContent = dashboardData.resolvedWeek;
 
         // Tickets resolvidos no mês
-        const resolvedMonth = ticketManager.getResolvedThisMonth(tickets);
-        document.getElementById('resolved-month').textContent = resolvedMonth.length;
+        document.getElementById('resolved-month').textContent = dashboardData.resolvedMonth;
     }
 
     /**
      * Cria os gráficos do dashboard
-     * @param {Array} tickets - Lista de tickets do usuário
+     * @param {Object} dashboardData - Dados do dashboard
      */
-    createCharts(tickets) {
-        this.createStatusChart(tickets);
-        this.createPriorityChart(tickets);
+    createCharts(dashboardData) {
+        this.createStatusChart(dashboardData.statusCounts);
+        this.createPriorityChart(dashboardData.priorityCounts);
     }
 
     /**
      * Cria o gráfico de status
-     * @param {Array} tickets - Lista de tickets do usuário
+     * @param {Object} statusCounts - Contagem de tickets por status
      */
-    createStatusChart(tickets) {
-        const statusCounts = ticketManager.countTicketsByStatus(tickets);
-        
+    createStatusChart(statusCounts) {
         const ctx = document.getElementById('status-chart').getContext('2d');
         
         // Destrói o gráfico anterior se existir
@@ -88,7 +130,7 @@ class DashboardManager {
                                 const label = context.label || '';
                                 const value = context.raw || 0;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
                                 return `${label}: ${value} (${percentage}%)`;
                             }
                         }
@@ -100,11 +142,9 @@ class DashboardManager {
 
     /**
      * Cria o gráfico de prioridades
-     * @param {Array} tickets - Lista de tickets do usuário
+     * @param {Object} priorityCounts - Contagem de tickets por prioridade
      */
-    createPriorityChart(tickets) {
-        const priorityCounts = ticketManager.countTicketsByPriority(tickets);
-        
+    createPriorityChart(priorityCounts) {
         const ctx = document.getElementById('priority-chart').getContext('2d');
         
         // Destrói o gráfico anterior se existir
@@ -149,11 +189,16 @@ class DashboardManager {
 
     /**
      * Atualiza o dashboard
-     * @param {Array} tickets - Lista de tickets do usuário
+     * @param {string} userId - ID do usuário
      */
-    update(tickets) {
-        this.updateStatistics(tickets);
-        this.createCharts(tickets);
+    async update(userId) {
+        try {
+            const dashboardData = await this.fetchDashboardData(userId);
+            this.updateStatistics(dashboardData);
+            this.createCharts(dashboardData);
+        } catch (error) {
+            console.error('Erro ao atualizar dashboard:', error);
+        }
     }
 }
 

@@ -59,11 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Inicializa a aplicação
      */
-    function init() {
+    async function init() {
         // Verifica se o usuário está autenticado
         if (authManager.isAuthenticated()) {
             showMainScreen();
-            loadTickets();
+            await loadTickets();
         } else {
             showLoginScreen();
         }
@@ -128,47 +128,56 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Manipula o login do usuário
      */
-    function handleLogin() {
+    async function handleLogin() {
         const email = loginEmail.value.trim();
-        const password = loginPassword.value;
-
+        const password = loginPassword.value.trim();
+        
         if (!email || !password) {
-            showLoginError('Preencha todos os campos');
+            showLoginError('Email e senha são obrigatórios');
             return;
         }
-
-        const result = authManager.login(email, password);
-
-        if (result.success) {
-            clearAuthForms();
-            showMainScreen();
-            loadTickets();
-        } else {
-            showLoginError(result.message);
+        
+        try {
+            const result = await authManager.login(email, password);
+            
+            if (result.success) {
+                showMainScreen();
+                clearAuthForms();
+            } else {
+                showLoginError(result.message);
+            }
+        } catch (error) {
+            showLoginError('Erro ao fazer login. Tente novamente.');
+            console.error('Erro de login:', error);
         }
     }
 
     /**
      * Manipula o registro de um novo usuário
      */
-    function handleRegister() {
+    async function handleRegister() {
         const name = registerName.value.trim();
         const email = registerEmail.value.trim();
-        const password = registerPassword.value;
-
+        const password = registerPassword.value.trim();
+        
         if (!name || !email || !password) {
-            showRegisterError('Preencha todos os campos');
+            showRegisterError('Todos os campos são obrigatórios');
             return;
         }
-
-        const result = authManager.register(name, email, password);
-
-        if (result.success) {
-            clearAuthForms();
-            showLoginScreen();
-            alert('Cadastro realizado com sucesso! Faça login para continuar.');
-        } else {
-            showRegisterError(result.message);
+        
+        try {
+            const result = await authManager.register(name, email, password);
+            
+            if (result.success) {
+                showLoginScreen();
+                clearAuthForms();
+                alert('Conta criada com sucesso! Faça login para continuar.');
+            } else {
+                showRegisterError(result.message);
+            }
+        } catch (error) {
+            showRegisterError('Erro ao criar conta. Tente novamente.');
+            console.error('Erro de registro:', error);
         }
     }
 
@@ -184,12 +193,16 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Carrega os tickets do usuário atual
      */
-    function loadTickets() {
+    async function loadTickets() {
         const user = authManager.getCurrentUser();
         if (!user) return;
-
-        currentTickets = ticketManager.getTickets(user.id);
-        renderTickets();
+        
+        try {
+            currentTickets = await ticketManager.getTickets(user.id);
+            renderTickets();
+        } catch (error) {
+            console.error('Erro ao carregar tickets:', error);
+        }
     }
 
     /**
@@ -328,12 +341,12 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Salva um ticket (novo ou editado)
      */
-    function saveTicket() {
+    async function saveTicket() {
+        const id = ticketId.value;
         const title = ticketTitle.value.trim();
         const description = ticketDescription.value.trim();
         const status = ticketStatus.value;
         const priority = ticketPriority.value;
-        const id = ticketId.value;
         
         if (!title) {
             alert('O título é obrigatório');
@@ -346,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (id) {
                 // Atualiza o ticket
-                ticketManager.updateTicket(id, {
+                await ticketManager.updateTicket(id, {
                     title,
                     description,
                     status,
@@ -354,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 // Cria um novo ticket
-                ticketManager.createTicket({
+                await ticketManager.createTicket({
                     title,
                     description,
                     status,
@@ -365,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Fecha o modal e atualiza a lista
             closeTicketModal();
-            loadTickets();
+            await loadTickets();
         } catch (error) {
             alert(`Erro ao salvar ticket: ${error.message}`);
         }
@@ -375,12 +388,17 @@ document.addEventListener('DOMContentLoaded', () => {
      * Resolve um ticket
      * @param {string} id - ID do ticket
      */
-    function resolveTicket(id) {
-        ticketManager.updateTicket(id, {
-            status: 'resolved'
-        });
-        
-        loadTickets();
+    async function resolveTicket(id) {
+        try {
+            await ticketManager.updateTicket(id, {
+                status: 'resolved'
+            });
+            
+            await loadTickets();
+        } catch (error) {
+            console.error('Erro ao resolver ticket:', error);
+            alert('Erro ao resolver ticket. Tente novamente.');
+        }
     }
 
     /**
@@ -391,9 +409,14 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteTicketId = id;
         confirmMessage.textContent = 'Tem certeza que deseja excluir este ticket?';
         
-        confirmCallback = () => {
-            ticketManager.deleteTicket(deleteTicketId);
-            loadTickets();
+        confirmCallback = async () => {
+            try {
+                await ticketManager.deleteTicket(deleteTicketId);
+                await loadTickets();
+            } catch (error) {
+                console.error('Erro ao excluir ticket:', error);
+                alert('Erro ao excluir ticket. Tente novamente.');
+            }
         };
         
         confirmModal.classList.remove('hidden');
@@ -450,8 +473,11 @@ document.addEventListener('DOMContentLoaded', () => {
         loginScreen.classList.add('hidden');
         registerScreen.classList.add('hidden');
         
-        // Inicializa o dashboard
-        dashboardManager.initialize(currentTickets);
+        // Inicializa o dashboard com o ID do usuário atual
+        const user = authManager.getCurrentUser();
+        if (user) {
+            dashboardManager.initialize(user.id);
+        }
     }
 
     /**
