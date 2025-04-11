@@ -1,15 +1,15 @@
 # Controle de Atividades
 
-![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
+![Versão](https://img.shields.io/badge/versão-2.0.0-blue)
 ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
-Uma aplicação web minimalista para gerenciamento de tickets e tarefas com armazenamento local no navegador. Ideal para organização pessoal sem necessidade de infraestrutura externa.
+Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em banco de dados SQLite. Ideal para organização pessoal com persistência de dados.
 
 ## 📋 Funcionalidades
 
 ### Autenticação Segura
 - Cadastro de usuários com nome, email e senha
-- Armazenamento seguro de senhas com criptografia
+- Armazenamento seguro de senhas com bcrypt
 - Login simples e intuitivo
 
 ### Gerenciamento de Tickets
@@ -33,17 +33,19 @@ A aplicação possui uma interface minimalista e intuitiva, dividida em:
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **HTML5, CSS3 e JavaScript**: Base da aplicação
-- **LocalStorage**: Armazenamento de dados no navegador
-- **CryptoJS**: Criptografia de senhas
+- **Frontend**: HTML5, CSS3 e JavaScript
+- **Backend**: Node.js com Express.js
+- **Banco de Dados**: SQLite
+- **Segurança**: bcryptjs para hash de senhas
 - **Chart.js**: Geração de gráficos estatísticos
 - **Font Awesome**: Ícones e elementos visuais
+- **CORS**: Gerenciamento de requisições cross-origin
 
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-- Navegador web moderno
-- Python (para servidor local)
+- Node.js (v14 ou superior)
+- NPM (v6 ou superior)
 
 ### Instalação e Execução
 
@@ -53,17 +55,20 @@ A aplicação possui uma interface minimalista e intuitiva, dividida em:
    cd controle-de-atividades
    ```
 
-2. Execute o script de inicialização:
+2. Instale as dependências:
    ```bash
-   ./iniciar.sh
+   npm install
    ```
 
-3. Acesse a aplicação no navegador:
-   ```
-   http://localhost:8000
+3. Inicie o servidor:
+   ```bash
+   node server.js
    ```
 
-> **Nota**: O script tentará as portas 8000, 8080 e 9000 caso alguma esteja ocupada.
+4. Acesse a aplicação no navegador:
+   ```
+   http://localhost:3000
+   ```
 
 ## 📱 Responsividade
 
@@ -74,9 +79,9 @@ A aplicação é totalmente responsiva, adaptando-se a diferentes tamanhos de te
 
 ## 🔒 Segurança e Privacidade
 
-- Todos os dados são armazenados localmente no navegador do usuário
-- Senhas criptografadas com algoritmo SHA-256
-- Sem envio de dados para servidores externos
+- Dados armazenados em banco de dados SQLite
+- Senhas protegidas com hash bcrypt
+- API RESTful para comunicação segura entre frontend e backend
 
 ## 🤝 Contribuindo
 
@@ -103,8 +108,13 @@ controle-de-atividades/
 │   ├── auth.js
 │   ├── dashboard.js
 │   └── tickets.js
+├── node_modules/
+├── .gitignore
+├── database.sqlite
 ├── index.html
-├── iniciar.sh
+├── package.json
+├── package-lock.json
+├── server.js
 └── README.md
 ```
 
@@ -116,7 +126,8 @@ Funcionalidades planejadas para versões futuras:
 - Exportação e importação de dados
 - Categorias personalizáveis para tickets
 - Notificações para tickets próximos do prazo
-- Sincronização entre dispositivos
+- Autenticação com JWT
+- Painel administrativo
 
 ---
 
