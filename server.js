@@ -334,19 +334,19 @@ app.get('/api/dashboard/:userId', async (req, res) => {
         
         // Tickets resolvidos hoje
         const resolvedToday = await db.all(
-            'SELECT COUNT(*) as count FROM tickets WHERE userId = ? AND status = ? AND updated_at >= ?', 
+            'SELECT COUNT(*) as count FROM tickets WHERE user_id = ? AND status = ? AND updated_at >= ?', 
             [userId, 'resolved', today]
         );
         
         // Tickets resolvidos na semana
         const resolvedWeek = await db.all(
-            'SELECT COUNT(*) as count FROM tickets WHERE userId = ? AND status = ? AND updated_at >= ?', 
+            'SELECT COUNT(*) as count FROM tickets WHERE user_id = ? AND status = ? AND updated_at >= ?', 
             [userId, 'resolved', weekStart]
         );
         
         // Tickets resolvidos no mês
         const resolvedMonth = await db.all(
-            'SELECT COUNT(*) as count FROM tickets WHERE userId = ? AND status = ? AND updated_at >= ?', 
+            'SELECT COUNT(*) as count FROM tickets WHERE user_id = ? AND status = ? AND updated_at >= ?', 
             [userId, 'resolved', startOfMonth]
         );
         

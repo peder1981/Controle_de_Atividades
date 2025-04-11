@@ -244,7 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = `ticket-card priority-${ticket.priority}`;
         
         // Formata as datas
-        const createdDate = new Date(ticket.createdAt).toLocaleDateString('pt-BR');
+        let createdDate = 'Data indisponível';
+        try {
+            if (ticket.created_at) {
+                createdDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
+            }
+        } catch (error) {
+            console.error('Erro ao formatar data:', error);
+        }
         
         // Mapeia os status e prioridades para exibição
         const statusMap = {

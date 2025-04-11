@@ -83,6 +83,30 @@ A aplicação é totalmente responsiva, adaptando-se a diferentes tamanhos de te
 - Senhas protegidas com hash bcrypt
 - API RESTful para comunicação segura entre frontend e backend
 
+## 🔄 Versionamento e Git
+
+### Configuração do .gitignore
+O projeto inclui um arquivo `.gitignore` configurado para excluir:
+- Arquivos de banco de dados SQLite (`*.sqlite`, `*.db`)
+- Diretório `node_modules/`
+- Arquivos de configuração de ambiente (`.env`)
+- Arquivos de log
+- Arquivos temporários do sistema
+
+### Preparando para Commit
+Antes de fazer commit para o GitHub, certifique-se de:
+1. Verificar se o arquivo `database.sqlite` está no `.gitignore`
+2. Parar o servidor Node.js se estiver em execução
+3. Verificar se não há informações sensíveis no código
+
+### Commits Recomendados
+Organize seus commits de forma lógica:
+```bash
+git add .
+git commit -m "Versão 2.0.0: Migração para SQLite e implementação de backend"
+git push origin main
+```
+
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Para contribuir:
@@ -110,13 +134,21 @@ controle-de-atividades/
 │   └── tickets.js
 ├── node_modules/
 ├── .gitignore
-├── database.sqlite
+├── database.sqlite (não versionado)
 ├── index.html
 ├── package.json
 ├── package-lock.json
 ├── server.js
 └── README.md
 ```
+
+## 🛠️ Correções Recentes
+
+### Versão 2.0.1 (11/04/2025)
+- Corrigido problema de exibição "Invalid Date" nos cards de tickets
+- Adicionado tratamento de erro para formatação de datas
+- Melhorada a compatibilidade entre os campos do backend e frontend
+- Atualizada a documentação para incluir instruções de versionamento
 
 ## 🔮 Próximos Passos
 
@@ -128,6 +160,8 @@ Funcionalidades planejadas para versões futuras:
 - Notificações para tickets próximos do prazo
 - Autenticação com JWT
 - Painel administrativo
+- Padronização de nomenclatura entre backend e frontend
+- Centralização do tratamento de datas
 
 ---
 
