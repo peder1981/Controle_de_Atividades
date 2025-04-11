@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Atividades</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Tela de Login -->
+        <div id="login-screen" class="auth-screen">
+            <div class="auth-container">
+                <h1>Controle de Atividades</h1>
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="Seu email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Senha</label>
+                    <input type="password" id="login-password" placeholder="Sua senha" required>
+                </div>
+                <button id="login-btn" class="primary-btn">Entrar</button>
+                <p class="auth-link">Não tem uma conta? <a href="#" id="go-to-register">Criar nova conta</a></p>
+                <div id="login-error" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Tela de Cadastro -->
+        <div id="register-screen" class="auth-screen hidden">
+            <div class="auth-container">
+                <h1>Criar Conta</h1>
+                <div class="form-group">
+                    <label for="register-name">Nome</label>
+                    <input type="text" id="register-name" placeholder="Seu nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="Seu email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Senha</label>
+                    <input type="password" id="register-password" placeholder="Sua senha" required>
+                </div>
+                <button id="register-btn" class="primary-btn">Cadastrar</button>
+                <p class="auth-link">Já tem uma conta? <a href="#" id="go-to-login">Voltar ao login</a></p>
+                <div id="register-error" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Tela Principal (Tickets) -->
+        <div id="main-screen" class="main-container hidden">
+            <header class="main-header">
+                <h1>Controle de Atividades</h1>
+                <nav>
+                    <button id="go-to-dashboard-btn" class="nav-btn"><i class="fas fa-chart-pie"></i> Dashboard</button>
+                    <button id="logout-btn" class="nav-btn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                </nav>
+            </header>
+            
+            <div class="content-container">
+                <div class="tickets-header">
+                    <h2>Meus Tickets</h2>
+                    <button id="new-ticket-btn" class="primary-btn"><i class="fas fa-plus"></i> Novo Ticket</button>
+                </div>
+                
+                <div class="tickets-filter">
+                    <select id="status-filter">
+                        <option value="all">Todos os Status</option>
+                        <option value="open">Aberto</option>
+                        <option value="in-progress">Em Andamento</option>
+                        <option value="resolved">Resolvido</option>
+                    </select>
+                    <select id="priority-filter">
+                        <option value="all">Todas as Prioridades</option>
+                        <option value="low">Baixa</option>
+                        <option value="medium">Média</option>
+                        <option value="high">Alta</option>
+                    </select>
+                </div>
+                
+                <div id="tickets-list" class="tickets-list">
+                    <!-- Os tickets serão inseridos aqui dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Dashboard -->
+        <div id="dashboard-screen" class="main-container hidden">
+            <header class="main-header">
+                <h1>Dashboard</h1>
+                <nav>
+                    <button id="go-to-tickets-btn" class="nav-btn"><i class="fas fa-tasks"></i> Tickets</button>
+                    <button id="logout-from-dashboard-btn" class="nav-btn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                </nav>
+            </header>
+            
+            <div class="content-container">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Total de Tickets</h3>
+                        <p id="total-tickets">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Resolvidos Hoje</h3>
+                        <p id="resolved-today">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Resolvidos na Semana</h3>
+                        <p id="resolved-week">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Resolvidos no Mês</h3>
+                        <p id="resolved-month">0</p>
+                    </div>
+                </div>
+                
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Status dos Tickets</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="status-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Prioridades dos Tickets</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="priority-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Ticket -->
+        <div id="ticket-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2 id="modal-title">Novo Ticket</h2>
+                <div class="form-group">
+                    <label for="ticket-title">Título</label>
+                    <input type="text" id="ticket-title" placeholder="Título do ticket" required>
+                </div>
+                <div class="form-group">
+                    <label for="ticket-description">Descrição (opcional)</label>
+                    <textarea id="ticket-description" placeholder="Descrição detalhada"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ticket-status">Status</label>
+                    <select id="ticket-status">
+                        <option value="open">Aberto</option>
+                        <option value="in-progress">Em Andamento</option>
+                        <option value="resolved">Resolvido</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ticket-priority">Prioridade</label>
+                    <select id="ticket-priority">
+                        <option value="low">Baixa</option>
+                        <option value="medium">Média</option>
+                        <option value="high">Alta</option>
+                    </select>
+                </div>
+                <input type="hidden" id="ticket-id">
+                <button id="save-ticket-btn" class="primary-btn">Salvar</button>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmação -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Confirmação</h2>
+                <p id="confirm-message">Tem certeza que deseja excluir este ticket?</p>
+                <div class="modal-buttons">
+                    <button id="confirm-yes" class="primary-btn">Sim</button>
+                    <button id="confirm-no" class="secondary-btn">Não</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/tickets.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
