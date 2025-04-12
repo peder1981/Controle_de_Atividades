@@ -399,6 +399,22 @@ textarea {
     height: 250px;
 }
 
+/* Métricas de tempo */
+.time-metrics-section {
+    margin-top: 2rem;
+}
+
+.time-metrics-section h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+    margin-top: 1.5rem;
+}
+
 /* Modal */
 .modal {
     position: fixed;

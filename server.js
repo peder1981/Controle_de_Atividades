@@ -55,9 +55,67 @@ async function initDatabase() {
             FOREIGN KEY (user_id) REFERENCES users(id),
             FOREIGN KEY (assigned_to) REFERENCES users(id)
         );
+
+        CREATE TABLE IF NOT EXISTS tickets_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticket_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (ticket_id) REFERENCES tickets(id)
+        );
     `);
 
+    // Verifica se é necessário migrar dados históricos
+    await migrateTicketsHistory();
+
     console.log('Banco de dados inicializado com sucesso');
+}
+
+// Função para migrar dados históricos para a tabela tickets_history
+async function migrateTicketsHistory() {
+    try {
+        // Verifica se já existem registros na tabela tickets_history
+        const historyCount = await db.get('SELECT COUNT(*) as count FROM tickets_history');
+        
+        // Se já existem registros, não é necessário migrar
+        if (historyCount.count > 0) {
+            console.log('Migração de histórico de tickets não é necessária');
+            return;
+        }
+        
+        // Busca todos os tickets existentes
+        const tickets = await db.all('SELECT * FROM tickets');
+        console.log(`Migrando histórico para ${tickets.length} tickets existentes`);
+        
+        // Para cada ticket, cria um registro histórico baseado no status atual
+        for (const ticket of tickets) {
+            // Registro inicial (quando o ticket foi criado)
+            await db.run(
+                'INSERT INTO tickets_history (ticket_id, status, updated_at) VALUES (?, ?, ?)',
+                [ticket.id, 'open', ticket.created_at]
+            );
+            
+            // Se o status atual não é 'open', adiciona um registro para o status atual
+            if (ticket.status !== 'open') {
+                await db.run(
+                    'INSERT INTO tickets_history (ticket_id, status, updated_at) VALUES (?, ?, ?)',
+                    [ticket.id, ticket.status, ticket.updated_at]
+                );
+            }
+            
+            // Se o ticket está resolvido, adiciona um registro para a resolução
+            if (ticket.status === 'resolved' && ticket.resolved_at) {
+                await db.run(
+                    'INSERT INTO tickets_history (ticket_id, status, updated_at) VALUES (?, ?, ?)',
+                    [ticket.id, 'resolved', ticket.resolved_at]
+                );
+            }
+        }
+        
+        console.log('Migração de histórico de tickets concluída com sucesso');
+    } catch (error) {
+        console.error('Erro ao migrar histórico de tickets:', error);
+    }
 }
 
 // Rotas de usuários
@@ -240,6 +298,12 @@ app.post('/api/tickets', async (req, res) => {
             ]
         );
 
+        // Cria o histórico do ticket
+        await db.run(
+            'INSERT INTO tickets_history (ticket_id, status, updated_at) VALUES (?, ?, ?)',
+            [id, status || 'open', now]
+        );
+
         const newTicket = await db.get('SELECT * FROM tickets WHERE id = ?', [id]);
         return res.status(201).json({ success: true, ticket: newTicket });
     } catch (error) {
@@ -281,6 +345,12 @@ app.put('/api/tickets/:id', async (req, res) => {
             ]
         );
 
+        // Atualiza o histórico do ticket
+        await db.run(
+            'INSERT INTO tickets_history (ticket_id, status, updated_at) VALUES (?, ?, ?)',
+            [id, status || ticket.status, now]
+        );
+
         const updatedTicket = await db.get('SELECT * FROM tickets WHERE id = ?', [id]);
         return res.status(200).json({ success: true, ticket: updatedTicket });
     } catch (error) {
@@ -301,6 +371,7 @@ app.delete('/api/tickets/:id', async (req, res) => {
 
         // Exclui o ticket
         await db.run('DELETE FROM tickets WHERE id = ?', [id]);
+        await db.run('DELETE FROM tickets_history WHERE ticket_id = ?', [id]);
         return res.status(200).json({ success: true, message: 'Ticket excluído com sucesso' });
     } catch (error) {
         console.error('Erro ao excluir ticket:', error);
@@ -377,6 +448,121 @@ app.get('/api/dashboard/:userId', async (req, res) => {
             }
         });
         
+        // Cálculo dos tempos médios
+        // 1. Tempo médio entre abertura e início do andamento
+        const ticketsWithProgressTime = await db.all(`
+            SELECT 
+                t1.id,
+                t1.created_at as created_at,
+                t2.updated_at as in_progress_at
+            FROM 
+                tickets t1
+            JOIN 
+                (SELECT ticket_id, MIN(updated_at) as updated_at 
+                FROM tickets_history 
+                WHERE status = 'in-progress' 
+                GROUP BY ticket_id) t2
+            ON 
+                t1.id = t2.ticket_id
+            WHERE 
+                t1.user_id = ?
+        `, [userId]);
+        
+        let avgTimeToProgress = 0;
+        if (ticketsWithProgressTime && ticketsWithProgressTime.length > 0) {
+            let validTimeCount = 0;
+            const totalTimeToProgress = ticketsWithProgressTime.reduce((sum, ticket) => {
+                if (!ticket.created_at || !ticket.in_progress_at) return sum;
+                
+                const createdDate = new Date(ticket.created_at);
+                const inProgressDate = new Date(ticket.in_progress_at);
+                
+                // Verifica se as datas são válidas
+                if (isNaN(createdDate.getTime()) || isNaN(inProgressDate.getTime())) return sum;
+                
+                // Verifica se a data de progresso é posterior à data de criação
+                if (inProgressDate <= createdDate) return sum;
+                
+                validTimeCount++;
+                return sum + (inProgressDate - createdDate);
+            }, 0);
+            
+            if (validTimeCount > 0) {
+                avgTimeToProgress = totalTimeToProgress / validTimeCount / (1000 * 60 * 60 * 24); // Em dias
+            }
+        }
+        
+        // 2. Tempo médio entre abertura e resolução
+        const resolvedTickets = tickets.filter(ticket => ticket.status === 'resolved' && ticket.resolved_at);
+        let avgTimeToResolve = 0;
+        if (resolvedTickets && resolvedTickets.length > 0) {
+            let validTimeCount = 0;
+            const totalTimeToResolve = resolvedTickets.reduce((sum, ticket) => {
+                if (!ticket.created_at || !ticket.resolved_at) return sum;
+                
+                const createdDate = new Date(ticket.created_at);
+                const resolvedDate = new Date(ticket.resolved_at);
+                
+                // Verifica se as datas são válidas
+                if (isNaN(createdDate.getTime()) || isNaN(resolvedDate.getTime())) return sum;
+                
+                // Verifica se a data de resolução é posterior à data de criação
+                if (resolvedDate <= createdDate) return sum;
+                
+                validTimeCount++;
+                return sum + (resolvedDate - createdDate);
+            }, 0);
+            
+            if (validTimeCount > 0) {
+                avgTimeToResolve = totalTimeToResolve / validTimeCount / (1000 * 60 * 60 * 24); // Em dias
+            }
+        }
+        
+        // 3. Tempo médio entre início do andamento e resolução
+        const ticketsWithProgressAndResolution = await db.all(`
+            SELECT 
+                t1.ticket_id,
+                t1.updated_at as in_progress_at,
+                t2.resolved_at
+            FROM 
+                (SELECT ticket_id, MIN(updated_at) as updated_at 
+                FROM tickets_history 
+                WHERE status = 'in-progress' 
+                GROUP BY ticket_id) t1
+            JOIN 
+                tickets t2
+            ON 
+                t1.ticket_id = t2.id
+            WHERE 
+                t2.user_id = ? AND
+                t2.status = 'resolved' AND
+                t2.resolved_at IS NOT NULL
+        `, [userId]);
+        
+        let avgTimeProgressToResolve = 0;
+        if (ticketsWithProgressAndResolution && ticketsWithProgressAndResolution.length > 0) {
+            let validTimeCount = 0;
+            const totalTimeProgressToResolve = ticketsWithProgressAndResolution.reduce((sum, ticket) => {
+                if (!ticket.in_progress_at || !ticket.resolved_at) return sum;
+                
+                const inProgressDate = new Date(ticket.in_progress_at);
+                const resolvedDate = new Date(ticket.resolved_at);
+                
+                // Verifica se as datas são válidas
+                if (isNaN(inProgressDate.getTime()) || isNaN(resolvedDate.getTime())) return sum;
+                
+                // Verifica se a data de resolução é posterior à data de início do andamento
+                if (resolvedDate <= inProgressDate) return sum;
+                
+                validTimeCount++;
+                return sum + (resolvedDate - inProgressDate);
+            }, 0);
+            
+            if (validTimeCount > 0) {
+                avgTimeProgressToResolve = totalTimeProgressToResolve / validTimeCount / (1000 * 60 * 60 * 24); // Em dias
+            }
+        }
+        
         // Monta o objeto de resposta
         const dashboardData = {
             totalTickets,
@@ -384,7 +570,10 @@ app.get('/api/dashboard/:userId', async (req, res) => {
             resolvedWeek: resolvedWeek[0].count,
             resolvedMonth: resolvedMonth[0].count,
             statusCounts,
-            priorityCounts
+            priorityCounts,
+            avgTimeToProgress,
+            avgTimeToResolve,
+            avgTimeProgressToResolve
         };
         
         return res.status(200).json({

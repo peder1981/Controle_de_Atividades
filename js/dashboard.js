@@ -6,6 +6,7 @@ class DashboardManager {
     constructor() {
         this.statusChart = null;
         this.priorityChart = null;
+        this.timeMetricsChart = null;
         this.apiUrl = 'http://localhost:3000/api';
     }
 
@@ -23,6 +24,7 @@ class DashboardManager {
             const dashboardData = await this.fetchDashboardData(userId);
             this.updateStatistics(dashboardData);
             this.createCharts(dashboardData);
+            this.createTimeMetricsChart(dashboardData);
         } catch (error) {
             console.error('Erro ao inicializar dashboard:', error);
         }
@@ -48,7 +50,10 @@ class DashboardManager {
                     resolvedWeek: 0,
                     resolvedMonth: 0,
                     statusCounts: { open: 0, 'in-progress': 0, resolved: 0 },
-                    priorityCounts: { low: 0, medium: 0, high: 0 }
+                    priorityCounts: { low: 0, medium: 0, high: 0 },
+                    avgTimeToProgress: 0,
+                    avgTimeToResolve: 0,
+                    avgTimeProgressToResolve: 0
                 };
             }
         } catch (error) {
@@ -59,7 +64,10 @@ class DashboardManager {
                 resolvedWeek: 0,
                 resolvedMonth: 0,
                 statusCounts: { open: 0, 'in-progress': 0, resolved: 0 },
-                priorityCounts: { low: 0, medium: 0, high: 0 }
+                priorityCounts: { low: 0, medium: 0, high: 0 },
+                avgTimeToProgress: 0,
+                avgTimeToResolve: 0,
+                avgTimeProgressToResolve: 0
             };
         }
     }
@@ -80,6 +88,26 @@ class DashboardManager {
 
         // Tickets resolvidos no mês
         document.getElementById('resolved-month').textContent = dashboardData.resolvedMonth;
+        
+        // Tempos médios
+        const formatTime = (days) => {
+            if (days < 1) {
+                const hours = Math.round(days * 24);
+                return hours === 1 ? '1 hora' : `${hours} horas`;
+            } else {
+                const roundedDays = Math.round(days * 10) / 10;
+                return roundedDays === 1 ? '1 dia' : `${roundedDays} dias`;
+            }
+        };
+        
+        // Tempo médio entre abertura e início do andamento
+        document.getElementById('avg-time-to-progress').textContent = formatTime(dashboardData.avgTimeToProgress);
+        
+        // Tempo médio entre abertura e resolução
+        document.getElementById('avg-time-to-resolve').textContent = formatTime(dashboardData.avgTimeToResolve);
+        
+        // Tempo médio entre início do andamento e resolução
+        document.getElementById('avg-time-progress-to-resolve').textContent = formatTime(dashboardData.avgTimeProgressToResolve);
     }
 
     /**
@@ -186,6 +214,76 @@ class DashboardManager {
             }
         });
     }
+    
+    /**
+     * Cria o gráfico de métricas de tempo
+     * @param {Object} dashboardData - Dados do dashboard
+     */
+    createTimeMetricsChart(dashboardData) {
+        const ctx = document.getElementById('time-metrics-chart').getContext('2d');
+        
+        // Destrói o gráfico anterior se existir
+        if (this.timeMetricsChart) {
+            this.timeMetricsChart.destroy();
+        }
+        
+        this.timeMetricsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Abertura → Andamento', 
+                    'Abertura → Resolução', 
+                    'Andamento → Resolução'
+                ],
+                datasets: [{
+                    label: 'Tempo Médio (Dias)',
+                    data: [
+                        dashboardData.avgTimeToProgress, 
+                        dashboardData.avgTimeToResolve, 
+                        dashboardData.avgTimeProgressToResolve
+                    ],
+                    backgroundColor: [
+                        '#4a6fa5', // Azul
+                        '#28a745', // Verde
+                        '#6f42c1'  // Roxo
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Dias'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw || 0;
+                                if (value < 1) {
+                                    const hours = Math.round(value * 24);
+                                    return `Tempo médio: ${hours} hora(s)`;
+                                } else {
+                                    const days = Math.round(value * 10) / 10;
+                                    return `Tempo médio: ${days} dia(s)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     /**
      * Atualiza o dashboard
@@ -196,6 +294,7 @@ class DashboardManager {
             const dashboardData = await this.fetchDashboardData(userId);
             this.updateStatistics(dashboardData);
             this.createCharts(dashboardData);
+            this.createTimeMetricsChart(dashboardData);
         } catch (error) {
             console.error('Erro ao atualizar dashboard:', error);
         }

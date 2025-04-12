@@ -1,6 +1,6 @@
 # Controle de Atividades
 
-![Versão](https://img.shields.io/badge/versão-2.0.0-blue)
+![Versão](https://img.shields.io/badge/versão-2.1.0-blue)
 ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
 Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em banco de dados SQLite. Ideal para organização pessoal com persistência de dados.
@@ -22,6 +22,10 @@ Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em
 - Visão geral do total de tickets
 - Acompanhamento de tickets resolvidos (hoje/semana/mês)
 - Gráficos de distribuição por status e prioridade
+- Métricas de tempo médio entre etapas do ciclo de vida dos tickets
+  - Tempo entre abertura e início do andamento
+  - Tempo entre abertura e resolução
+  - Tempo entre início do andamento e resolução
 
 ## 🖥️ Interface
 
@@ -103,7 +107,7 @@ Antes de fazer commit para o GitHub, certifique-se de:
 Organize seus commits de forma lógica:
 ```bash
 git add .
-git commit -m "Versão 2.0.0: Migração para SQLite e implementação de backend"
+git commit -m "Versão 2.1.0: Adicionados dashboards de tempo médio e melhorias"
 git push origin main
 ```
 
@@ -143,6 +147,15 @@ controle-de-atividades/
 ```
 
 ## 🛠️ Correções Recentes
+
+### Versão 2.1.0 (12/04/2025)
+- Adicionados três novos dashboards de métricas de tempo:
+  - Tempo médio entre abertura e início do andamento
+  - Tempo médio entre abertura e resolução
+  - Tempo médio entre início do andamento e resolução
+- Implementada tabela de histórico de tickets para rastreamento de status
+- Melhorada a visualização de dados com gráfico comparativo de tempos médios
+- Adicionada migração automática de dados históricos
 
 ### Versão 2.0.1 (11/04/2025)
 - Corrigido problema de exibição "Invalid Date" nos cards de tickets

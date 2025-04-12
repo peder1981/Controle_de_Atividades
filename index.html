@@ -132,6 +132,31 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Nova seção para métricas de tempo -->
+                <div class="time-metrics-section">
+                    <h2>Métricas de Tempo</h2>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <h3>Abertura → Andamento</h3>
+                            <p id="avg-time-to-progress">0 dias</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Abertura → Resolução</h3>
+                            <p id="avg-time-to-resolve">0 dias</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Andamento → Resolução</h3>
+                            <p id="avg-time-progress-to-resolve">0 dias</p>
+                        </div>
+                    </div>
+                    <div class="chart-card full-width">
+                        <h3>Comparativo de Tempos Médios</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="time-metrics-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
