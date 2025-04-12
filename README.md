@@ -1,6 +1,6 @@
 # Controle de Atividades
 
-![Versão](https://img.shields.io/badge/versão-2.1.0-blue)
+![Versão](https://img.shields.io/badge/versão-2.2.0-blue)
 ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
 Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em banco de dados SQLite. Ideal para organização pessoal com persistência de dados.
@@ -27,6 +27,19 @@ Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em
   - Tempo entre abertura e resolução
   - Tempo entre início do andamento e resolução
 
+### Relatórios Avançados
+- Análise de tendências ao longo do tempo
+- Comparativo entre diferentes períodos
+- Métricas de eficiência por usuário ou categoria
+- Análise de carga de trabalho
+- Análise de tempo de resposta
+
+### Automação e Alertas
+- Agendamento de relatórios periódicos (diário, semanal, mensal)
+- Alertas baseados em métricas configuráveis
+- Notificações por e-mail
+- Histórico de alertas disparados
+
 ## 🖥️ Interface
 
 A aplicação possui uma interface minimalista e intuitiva, dividida em:
@@ -34,6 +47,7 @@ A aplicação possui uma interface minimalista e intuitiva, dividida em:
 - **Tela de Login/Cadastro**: Acesso seguro à aplicação
 - **Tela Principal**: Gerenciamento completo de tickets
 - **Dashboard**: Visualização de estatísticas e métricas
+- **Relatórios Avançados**: Análises detalhadas e configuração de automações
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -44,6 +58,8 @@ A aplicação possui uma interface minimalista e intuitiva, dividida em:
 - **Chart.js**: Geração de gráficos estatísticos
 - **Font Awesome**: Ícones e elementos visuais
 - **CORS**: Gerenciamento de requisições cross-origin
+- **Node-cron**: Agendamento de tarefas
+- **Nodemailer**: Envio de e-mails
 
 ## 🚀 Como Executar
 
@@ -107,7 +123,7 @@ Antes de fazer commit para o GitHub, certifique-se de:
 Organize seus commits de forma lógica:
 ```bash
 git add .
-git commit -m "Versão 2.1.0: Adicionados dashboards de tempo médio e melhorias"
+git commit -m "Versão 2.2.0: Adicionados relatórios avançados e alertas de métricas"
 git push origin main
 ```
 
@@ -135,11 +151,15 @@ controle-de-atividades/
 │   ├── app.js
 │   ├── auth.js
 │   ├── dashboard.js
-│   └── tickets.js
+│   ├── tickets.js
+│   └── advanced-reports.js
+├── modules/
+│   └── scheduler.js
 ├── node_modules/
 ├── .gitignore
 ├── database.sqlite (não versionado)
 ├── index.html
+├── advanced-reports.html
 ├── package.json
 ├── package-lock.json
 ├── server.js
@@ -147,6 +167,18 @@ controle-de-atividades/
 ```
 
 ## 🛠️ Correções Recentes
+
+### Versão 2.2.0 (15/04/2025)
+- Implementados relatórios avançados:
+  - Análise de tendências
+  - Comparativo de períodos
+  - Métricas de eficiência
+  - Análise de carga de trabalho
+  - Análise de tempo de resposta
+- Adicionado sistema de agendamento de relatórios
+- Implementados alertas baseados em métricas configuráveis
+- Adicionado sistema de notificações por e-mail
+- Criada interface para gerenciamento de relatórios e alertas
 
 ### Versão 2.1.0 (12/04/2025)
 - Adicionados três novos dashboards de métricas de tempo:
@@ -156,12 +188,6 @@ controle-de-atividades/
 - Implementada tabela de histórico de tickets para rastreamento de status
 - Melhorada a visualização de dados com gráfico comparativo de tempos médios
 - Adicionada migração automática de dados históricos
-
-### Versão 2.0.1 (11/04/2025)
-- Corrigido problema de exibição "Invalid Date" nos cards de tickets
-- Adicionado tratamento de erro para formatação de datas
-- Melhorada a compatibilidade entre os campos do backend e frontend
-- Atualizada a documentação para incluir instruções de versionamento
 
 ## 🔮 Próximos Passos
 

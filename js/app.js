@@ -28,11 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusFilter = document.getElementById('status-filter');
     const priorityFilter = document.getElementById('priority-filter');
     const goToDashboardBtn = document.getElementById('go-to-dashboard-btn');
+    const goToReportsBtn = document.getElementById('go-to-reports-btn');
+    const goToAdvancedReportsBtn = document.getElementById('go-to-advanced-reports-btn');
 
     // Elementos da tela de dashboard
     const dashboardScreen = document.getElementById('dashboard-screen');
     const goToTicketsBtn = document.getElementById('go-to-tickets-btn');
     const logoutFromDashboardBtn = document.getElementById('logout-from-dashboard-btn');
+    const goToReportsFromDashboardBtn = document.getElementById('go-to-reports-from-dashboard-btn');
+    const goToAdvancedReportsFromDashboardBtn = document.getElementById('go-to-advanced-reports-from-dashboard-btn');
 
     // Elementos do modal de ticket
     const ticketModal = document.getElementById('ticket-modal');
@@ -96,10 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
         statusFilter.addEventListener('change', filterTickets);
         priorityFilter.addEventListener('change', filterTickets);
         goToDashboardBtn.addEventListener('click', showDashboardScreen);
+        goToReportsBtn.addEventListener('click', navigateToReports);
+        goToAdvancedReportsBtn.addEventListener('click', navigateToAdvancedReports);
 
         // Event listeners da tela de dashboard
         goToTicketsBtn.addEventListener('click', showMainScreen);
         logoutFromDashboardBtn.addEventListener('click', handleLogout);
+        goToReportsFromDashboardBtn.addEventListener('click', navigateToReports);
+        goToAdvancedReportsFromDashboardBtn.addEventListener('click', navigateToAdvancedReports);
 
         // Event listeners do modal de ticket
         closeModal.addEventListener('click', closeTicketModal);
@@ -485,6 +493,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             dashboardManager.initialize(user.id);
         }
+    }
+
+    /**
+     * Navega para a página de relatórios
+     */
+    function navigateToReports() {
+        // Redireciona para a página de relatórios
+        window.location.href = 'reports.html';
+    }
+
+    /**
+     * Navega para a página de relatórios avançados
+     */
+    function navigateToAdvancedReports() {
+        // Redireciona para a página de relatórios avançados
+        window.location.href = 'advanced-reports.html';
     }
 
     /**

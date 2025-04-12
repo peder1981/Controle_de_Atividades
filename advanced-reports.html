@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios Avançados - Controle de Atividades</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .card-header {
+            background-color: #f1f5f9;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+        }
+        .filter-section {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .report-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #f8f9fa;
+            border-bottom-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .btn-export {
+            margin-left: 10px;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+        }
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .modal-lg {
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Controle de Atividades</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="reports.html">Relatórios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="advanced-reports.html">Relatórios Avançados</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-link" id="userInfo">Usuário</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutBtn">Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">Relatórios Avançados e Automação</h2>
+
+        <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="trends-tab" data-bs-toggle="tab" data-bs-target="#trends-content" type="button" role="tab">
+                    <i class="bi bi-graph-up-arrow me-1"></i> Análise de Tendências
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison-content" type="button" role="tab">
+                    <i class="bi bi-bar-chart-steps me-1"></i> Comparativo de Períodos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="efficiency-tab" data-bs-toggle="tab" data-bs-target="#efficiency-content" type="button" role="tab">
+                    <i class="bi bi-speedometer2 me-1"></i> Métricas de Eficiência
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="workload-tab" data-bs-toggle="tab" data-bs-target="#workload-content" type="button" role="tab">
+                    <i class="bi bi-calendar-week me-1"></i> Análise de Carga
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="response-tab" data-bs-toggle="tab" data-bs-target="#response-content" type="button" role="tab">
+                    <i class="bi bi-clock-history me-1"></i> Tempo de Resposta
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="scheduled-tab" data-bs-toggle="tab" data-bs-target="#scheduled-content" type="button" role="tab">
+                    <i class="bi bi-calendar-check me-1"></i> Relatórios Agendados
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="alerts-tab" data-bs-toggle="tab" data-bs-target="#alerts-content" type="button" role="tab">
+                    <i class="bi bi-bell me-1"></i> Alertas de Métricas
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="reportTabsContent">
+            <!-- Análise de Tendências -->
+            <div class="tab-pane fade show active" id="trends-content" role="tabpanel">
+                <div class="filter-section mb-3">
+                    <h5 class="mb-3">Filtros</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="trendStartDate" class="form-label">Data Inicial</label>
+                            <input type="text" class="form-control datepicker" id="trendStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="trendEndDate" class="form-label">Data Final</label>
+                            <input type="text" class="form-control datepicker" id="trendEndDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="trendPeriod" class="form-label">Agrupar por</label>
+                            <select class="form-select" id="trendPeriod">
+                                <option value="day">Dia</option>
+                                <option value="week">Semana</option>
+                                <option value="month">Mês</option>
+                                <option value="year">Ano</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="trendMetric" class="form-label">Métrica</label>
+                            <select class="form-select" id="trendMetric">
+                                <option value="created">Tickets Criados</option>
+                                <option value="resolved">Tickets Resolvidos</option>
+                                <option value="resolution_time">Tempo de Resolução</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="trendCategory" class="form-label">Categoria</label>
+                            <select class="form-select" id="trendCategory">
+                                <option value="">Todas</option>
+                                <!-- Será preenchido via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="trendFilterBtn">
+                                <i class="bi bi-search me-1"></i> Filtrar
+                            </button>
+                            <button type="button" class="btn btn-success btn-export" id="trendScheduleBtn">
+                                <i class="bi bi-calendar-plus me-1"></i> Agendar Relatório
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-container">
+                    <div id="trendsLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="trendsContent" style="display: none;">
+                        <div class="chart-container">
+                            <canvas id="trendsChart"></canvas>
+                        </div>
+                        <div class="table-responsive mt-4">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Período</th>
+                                        <th id="trendsValueHeader">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trendsTable">
+                                    <!-- Será preenchido via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparativo de Períodos -->
+            <div class="tab-pane fade" id="comparison-content" role="tabpanel">
+                <!-- Conteúdo similar para comparativo de períodos -->
+                <div class="filter-section mb-3">
+                    <h5 class="mb-3">Filtros</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6>Período 1</h6>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label for="compPeriod1Start" class="form-label">Data Inicial</label>
+                                    <input type="text" class="form-control datepicker" id="compPeriod1Start">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="compPeriod1End" class="form-label">Data Final</label>
+                                    <input type="text" class="form-control datepicker" id="compPeriod1End">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Período 2</h6>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label for="compPeriod2Start" class="form-label">Data Inicial</label>
+                                    <input type="text" class="form-control datepicker" id="compPeriod2Start">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="compPeriod2End" class="form-label">Data Final</label>
+                                    <input type="text" class="form-control datepicker" id="compPeriod2End">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="compMetric" class="form-label">Métrica</label>
+                            <select class="form-select" id="compMetric">
+                                <option value="tickets">Tickets</option>
+                                <option value="resolution_time">Tempo de Resolução</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="compFilterBtn">
+                                <i class="bi bi-search me-1"></i> Comparar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-container">
+                    <div id="comparisonLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="comparisonContent" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">Período 1</div>
+                                    <div class="card-body">
+                                        <div id="period1Stats"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">Período 2</div>
+                                    <div class="card-body">
+                                        <div id="period2Stats"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">Variação Percentual</div>
+                            <div class="card-body">
+                                <div id="variationStats"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios Agendados -->
+            <div class="tab-pane fade" id="scheduled-content" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Relatórios Agendados</h5>
+                    <button type="button" class="btn btn-primary" id="newScheduledReportBtn">
+                        <i class="bi bi-plus-circle me-1"></i> Novo Relatório Agendado
+                    </button>
+                </div>
+                
+                <div class="report-container">
+                    <div id="scheduledLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="scheduledContent" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Agendamento</th>
+                                        <th>E-mail</th>
+                                        <th>Status</th>
+                                        <th>Última Execução</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduledReportsTable">
+                                    <!-- Será preenchido via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alertas de Métricas -->
+            <div class="tab-pane fade" id="alerts-content" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Alertas de Métricas</h5>
+                    <button type="button" class="btn btn-primary" id="newAlertBtn">
+                        <i class="bi bi-plus-circle me-1"></i> Novo Alerta
+                    </button>
+                </div>
+                
+                <div class="report-container">
+                    <div id="alertsLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="alertsContent" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Métrica</th>
+                                        <th>Condição</th>
+                                        <th>Limite</th>
+                                        <th>E-mail</th>
+                                        <th>Status</th>
+                                        <th>Último Disparo</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alertsTable">
+                                    <!-- Será preenchido via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Histórico de Alertas</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Alerta</th>
+                                            <th>Data/Hora</th>
+                                            <th>Valor</th>
+                                            <th>Condição</th>
+                                            <th>Notificação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="alertHistoryTable">
+                                        <!-- Será preenchido via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agendar Relatório -->
+    <div class="modal fade" id="scheduleReportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agendar Relatório</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="scheduleReportForm">
+                        <input type="hidden" id="scheduleReportId">
+                        <div class="mb-3">
+                            <label for="reportName" class="form-label">Nome do Relatório</label>
+                            <input type="text" class="form-control" id="reportName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportType" class="form-label">Tipo de Relatório</label>
+                            <select class="form-select" id="reportType" required>
+                                <option value="tickets">Tickets</option>
+                                <option value="performance">Desempenho</option>
+                                <option value="categories">Categorias</option>
+                                <option value="users">Desempenho por Usuário</option>
+                                <option value="trends">Análise de Tendências</option>
+                                <option value="comparison">Comparativo de Períodos</option>
+                                <option value="efficiency">Métricas de Eficiência</option>
+                                <option value="workload">Análise de Carga</option>
+                                <option value="response_time">Tempo de Resposta</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportSchedule" class="form-label">Frequência</label>
+                            <select class="form-select" id="reportSchedule" required>
+                                <option value="daily">Diário</option>
+                                <option value="weekly">Semanal</option>
+                                <option value="monthly">Mensal</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportEmail" class="form-label">E-mail para Envio</label>
+                            <input type="email" class="form-control" id="reportEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportParameters" class="form-label">Parâmetros (JSON)</label>
+                            <textarea class="form-control" id="reportParameters" rows="5" required></textarea>
+                            <small class="form-text text-muted">Os parâmetros serão preenchidos automaticamente se você agendar a partir de um relatório.</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveScheduleBtn">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Criar/Editar Alerta -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Alerta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="alertForm">
+                        <input type="hidden" id="alertId">
+                        <div class="mb-3">
+                            <label for="alertName" class="form-label">Nome do Alerta</label>
+                            <input type="text" class="form-control" id="alertName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="metricType" class="form-label">Tipo de Métrica</label>
+                            <select class="form-select" id="metricType" required>
+                                <option value="open_tickets">Tickets Abertos</option>
+                                <option value="resolution_time">Tempo Médio de Resolução</option>
+                                <option value="response_time">Tempo Médio de Resposta</option>
+                                <option value="high_priority_tickets">Tickets de Alta Prioridade</option>
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="condition" class="form-label">Condição</label>
+                                <select class="form-select" id="condition" required>
+                                    <option value=">">Maior que</option>
+                                    <option value=">=">Maior ou igual a</option>
+                                    <option value="<">Menor que</option>
+                                    <option value="<=">Menor ou igual a</option>
+                                    <option value="=">Igual a</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="threshold" class="form-label">Valor Limite</label>
+                                <input type="number" class="form-control" id="threshold" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="alertEmail" class="form-label">E-mail para Notificação</label>
+                            <input type="email" class="form-control" id="alertEmail" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="alertActive" checked>
+                            <label class="form-check-label" for="alertActive">Ativo</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveAlertBtn">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage">Tem certeza que deseja realizar esta ação?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmBtn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <script src="js/advanced-reports.js"></script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios Gerenciais - Controle de Atividades</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .card-header {
+            background-color: #f1f5f9;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+        }
+        .filter-section {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .report-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #f8f9fa;
+            border-bottom-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .btn-export {
+            margin-left: 10px;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Controle de Atividades</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="reports.html">Relatórios</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="nav-link" id="userInfo">Usuário</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutBtn">Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">Relatórios Gerenciais</h2>
+
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            Selecione um tipo de relatório e configure os filtros para visualizar os dados.
+        </div>
+
+        <ul class="nav nav-tabs mb-4" id="reportTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tickets-tab" data-bs-toggle="tab" data-bs-target="#tickets-content" type="button" role="tab">
+                    <i class="bi bi-ticket-detailed me-1"></i> Tickets
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance-content" type="button" role="tab">
+                    <i class="bi bi-graph-up me-1"></i> Desempenho
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-content" type="button" role="tab">
+                    <i class="bi bi-tag me-1"></i> Categorias
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-content" type="button" role="tab">
+                    <i class="bi bi-people me-1"></i> Desempenho por Usuário
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="reportTabsContent">
+            <!-- Relatório de Tickets -->
+            <div class="tab-pane fade show active" id="tickets-content" role="tabpanel">
+                <div class="filter-section mb-3">
+                    <h5 class="mb-3">Filtros</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="ticketStatus" class="form-label">Status</label>
+                            <select class="form-select" id="ticketStatus">
+                                <option value="">Todos</option>
+                                <option value="open">Aberto</option>
+                                <option value="in-progress">Em andamento</option>
+                                <option value="resolved">Resolvido</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ticketPriority" class="form-label">Prioridade</label>
+                            <select class="form-select" id="ticketPriority">
+                                <option value="">Todas</option>
+                                <option value="low">Baixa</option>
+                                <option value="medium">Média</option>
+                                <option value="high">Alta</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ticketCategory" class="form-label">Categoria</label>
+                            <select class="form-select" id="ticketCategory">
+                                <option value="">Todas</option>
+                                <!-- Será preenchido via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ticketAssignedTo" class="form-label">Atribuído a</label>
+                            <select class="form-select" id="ticketAssignedTo">
+                                <option value="">Todos</option>
+                                <!-- Será preenchido via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ticketStartDate" class="form-label">Data Inicial</label>
+                            <input type="text" class="form-control datepicker" id="ticketStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ticketEndDate" class="form-label">Data Final</label>
+                            <input type="text" class="form-control datepicker" id="ticketEndDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ticketSortBy" class="form-label">Ordenar por</label>
+                            <select class="form-select" id="ticketSortBy">
+                                <option value="created_at">Data de Criação</option>
+                                <option value="updated_at">Data de Atualização</option>
+                                <option value="priority">Prioridade</option>
+                                <option value="status">Status</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ticketSortOrder" class="form-label">Ordem</label>
+                            <select class="form-select" id="ticketSortOrder">
+                                <option value="desc">Decrescente</option>
+                                <option value="asc">Crescente</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="ticketFilterBtn">
+                                <i class="bi bi-search me-1"></i> Filtrar
+                            </button>
+                            <button type="button" class="btn btn-success btn-export" id="ticketExportBtn">
+                                <i class="bi bi-download me-1"></i> Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-container">
+                    <div id="ticketsLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="ticketsContent" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Título</th>
+                                        <th>Status</th>
+                                        <th>Prioridade</th>
+                                        <th>Categoria</th>
+                                        <th>Criado por</th>
+                                        <th>Atribuído a</th>
+                                        <th>Data de Criação</th>
+                                        <th>Última Atualização</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketsTable">
+                                    <!-- Será preenchido via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <span id="ticketsPagination">Mostrando 0 de 0 registros</span>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary me-2" id="prevPageBtn" disabled>
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="nextPageBtn" disabled>
+                                    Próximo <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatório de Desempenho -->
+            <div class="tab-pane fade" id="performance-content" role="tabpanel">
+                <div class="filter-section mb-3">
+                    <h5 class="mb-3">Filtros</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="perfStartDate" class="form-label">Data Inicial</label>
+                            <input type="text" class="form-control datepicker" id="perfStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="perfEndDate" class="form-label">Data Final</label>
+                            <input type="text" class="form-control datepicker" id="perfEndDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="perfGroupBy" class="form-label">Agrupar por</label>
+                            <select class="form-select" id="perfGroupBy">
+                                <option value="day">Dia</option>
+                                <option value="week">Semana</option>
+                                <option value="month">Mês</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="perfFilterBtn">
+                                <i class="bi bi-search me-1"></i> Filtrar
+                            </button>
+                            <button type="button" class="btn btn-success btn-export" id="perfExportBtn">
+                                <i class="bi bi-download me-1"></i> Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-container">
+                    <div id="performanceLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="performanceContent" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="bi bi-graph-up me-1"></i> Tickets Criados vs. Resolvidos
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="ticketsChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="bi bi-clock-history me-1"></i> Tempo Médio de Resolução (minutos)
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="timeChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatório por Categorias -->
+            <div class="tab-pane fade" id="categories-content" role="tabpanel">
+                <div class="filter-section mb-3">
+                    <h5 class="mb-3">Filtros</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="catStartDate" class="form-label">Data Inicial</label>
+                            <input type="text" class="form-control datepicker" id="catStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="catEndDate" class="form-label">Data Final</label>
+                            <input type="text" class="form-control datepicker" id="catEndDate">
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="catFilterBtn">
+                                <i class="bi bi-search me-1"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-container">
+                    <div id="categoriesLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="categoriesContent" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="bi bi-pie-chart me-1"></i> Distribuição por Categoria
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="categoriesChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="bi bi-bar-chart me-1"></i> Status por Categoria
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="categoryStatusChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="bi bi-table me-1"></i> Detalhes por Categoria
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Categoria</th>
+                                                        <th>Total</th>
+                                                        <th>Abertos</th>
+                                                        <th>Em Andamento</th>
+                                                        <th>Resolvidos</th>
+                                                        <th>% Resolvidos</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="categoriesTable">
+                                                    <!-- Será preenchido via JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatório de Desempenho por Usuário -->
+            <div class="tab-pane fade" id="users-content" role="tabpanel">
+                <div class="filter-section mb-3">
+                    <h5 class="mb-3">Filtros</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="userStartDate" class="form-label">Data Inicial</label>
+                            <input type="text" class="form-control datepicker" id="userStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="userEndDate" class="form-label">Data Final</label>
+                            <input type="text" class="form-control datepicker" id="userEndDate">
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="userFilterBtn">
+                                <i class="bi bi-search me-1"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-container">
+                    <div id="usersLoading" class="loading">
+                        <div class="spinner-border loading-spinner text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                    <div id="usersContent" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="bi bi-bar-chart me-1"></i> Tickets Resolvidos por Usuário
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="usersResolvedChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="bi bi-clock-history me-1"></i> Tempo Médio de Resolução por Usuário (minutos)
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="usersTimeChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="bi bi-table me-1"></i> Detalhes por Usuário
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Usuário</th>
+                                                        <th>Total de Tickets</th>
+                                                        <th>Tickets Resolvidos</th>
+                                                        <th>% Resolvidos</th>
+                                                        <th>Tempo Médio de Resolução (minutos)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="usersTable">
+                                                    <!-- Será preenchido via JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <script src="js/reports.js"></script>
+</body>
+</html>
