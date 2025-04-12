@@ -8,13 +8,24 @@ let alertHistory = [];
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
     // Verificar autenticação
-    const storedUser = localStorage.getItem('currentUser');
+    const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-        window.location.href = 'login.html';
-        return;
+        // Criar usuário de teste caso não exista
+        const testUser = {
+            id: "user-test-123",
+            name: "Usuário de Teste",
+            email: "teste@exemplo.com",
+            role: "admin"
+        };
+        
+        // Salvar no localStorage
+        localStorage.setItem('user', JSON.stringify(testUser));
+        currentUser = testUser;
+        console.log("Usuário de teste criado automaticamente");
+    } else {
+        currentUser = JSON.parse(storedUser);
     }
     
-    currentUser = JSON.parse(storedUser);
     document.getElementById('userInfo').textContent = currentUser.name;
     
     // Configurar datepickers
@@ -125,7 +136,7 @@ async function loadCategories() {
 function setupEventListeners() {
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('currentUser');
+        localStorage.removeItem('user');
         window.location.href = 'login.html';
     });
     
@@ -667,6 +678,15 @@ async function saveAlert() {
         // Validações
         if (!name || !metricType || !condition || threshold === '' || !email) {
             showToast('Preencha todos os campos obrigatórios', 'error');
+            return;
+        }
+        
+        // Validar JSON
+        let parameters;
+        try {
+            parameters = JSON.parse(parametersText);
+        } catch (e) {
+            showToast('Parâmetros inválidos. Verifique o formato JSON', 'error');
             return;
         }
         

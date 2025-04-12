@@ -1,6 +1,6 @@
 # Controle de Atividades
 
-![Versão](https://img.shields.io/badge/versão-2.2.0-blue)
+![Versão](https://img.shields.io/badge/versão-2.3.1-blue)
 ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
 Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em banco de dados SQLite. Ideal para organização pessoal com persistência de dados.
@@ -40,6 +40,12 @@ Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em
 - Notificações por e-mail
 - Histórico de alertas disparados
 
+### Interface e Experiência do Usuário
+- Layout unificado e consistente em todas as páginas
+- Suporte a modo escuro/claro com alternância em tempo real
+- Design responsivo para todos os dispositivos
+- Experiência visual coerente e moderna
+
 ## 🖥️ Interface
 
 A aplicação possui uma interface minimalista e intuitiva, dividida em:
@@ -56,10 +62,13 @@ A aplicação possui uma interface minimalista e intuitiva, dividida em:
 - **Banco de Dados**: SQLite
 - **Segurança**: bcryptjs para hash de senhas
 - **Chart.js**: Geração de gráficos estatísticos
-- **Font Awesome**: Ícones e elementos visuais
+- **Bootstrap 5**: Framework CSS para interface responsiva
+- **Bootstrap Icons**: Ícones modernos e consistentes
+- **Font Awesome**: Ícones e elementos visuais adicionais
 - **CORS**: Gerenciamento de requisições cross-origin
 - **Node-cron**: Agendamento de tarefas
 - **Nodemailer**: Envio de e-mails
+- **Flatpickr**: Seletor de datas avançado
 
 ## 🚀 Como Executar
 
@@ -123,7 +132,7 @@ Antes de fazer commit para o GitHub, certifique-se de:
 Organize seus commits de forma lógica:
 ```bash
 git add .
-git commit -m "Versão 2.2.0: Adicionados relatórios avançados e alertas de métricas"
+git commit -m "Versão 2.3.1: Correções recentes e melhorias"
 git push origin main
 ```
 
@@ -146,19 +155,23 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ```
 controle-de-atividades/
 ├── css/
-│   └── styles.css
+│   ├── styles.css
+│   └── main.css
 ├── js/
 │   ├── app.js
 │   ├── auth.js
 │   ├── dashboard.js
 │   ├── tickets.js
-│   └── advanced-reports.js
+│   ├── advanced-reports.js
+│   └── theme.js
 ├── modules/
 │   └── scheduler.js
 ├── node_modules/
 ├── .gitignore
 ├── database.sqlite (não versionado)
 ├── index.html
+├── login.html
+├── reports.html
 ├── advanced-reports.html
 ├── package.json
 ├── package-lock.json
@@ -167,6 +180,17 @@ controle-de-atividades/
 ```
 
 ## 🛠️ Correções Recentes
+
+### Versão 2.3.1 (12/04/2025)
+- Corrigido problema de acesso à página de relatórios avançados
+- Padronizada a gestão de autenticação entre as páginas
+- Melhorada a experiência do usuário com criação automática de usuário para testes
+- Atualizada a estrutura de arquivos CSS com arquivo unificado main.css
+
+### Versão 2.3.0 (20/04/2025)
+- Implementado layout unificado e consistente em todas as páginas
+- Adicionado suporte a modo escuro/claro com alternância em tempo real
+- Melhorada a experiência visual com design responsivo para todos os dispositivos
 
 ### Versão 2.2.0 (15/04/2025)
 - Implementados relatórios avançados:

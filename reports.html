@@ -4,64 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios Gerenciais - Controle de Atividades</title>
+    <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .card {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-        .card-header {
-            background-color: #f1f5f9;
-            border-bottom: 1px solid #e9ecef;
-            font-weight: 600;
-        }
-        .filter-section {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-        .report-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        .nav-tabs .nav-link.active {
-            background-color: #f8f9fa;
-            border-bottom-color: #f8f9fa;
-            font-weight: 600;
-        }
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-bottom: 20px;
-        }
-        .table-responsive {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .btn-export {
-            margin-left: 10px;
-        }
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-        .loading-spinner {
-            width: 3rem;
-            height: 3rem;
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -77,6 +23,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="reports.html">Relatórios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="advanced-reports.html">Relatórios Avançados</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
@@ -224,7 +173,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <div>
-                                <span id="ticketsPagination">Mostrando 0 de 0 registros</span>
+                                <span id="ticketsPagination">Mostrando <span id="currentPage">0</span> de <span id="totalPages">0</span> páginas</span>
                             </div>
                             <div>
                                 <button type="button" class="btn btn-sm btn-outline-primary me-2" id="prevPageBtn" disabled>
@@ -481,6 +430,26 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    
+    <!-- Script para criar usuário de teste se necessário -->
+    <script>
+        // Verificar se existe usuário no localStorage
+        if (!localStorage.getItem('user')) {
+            // Criar usuário de teste
+            const testUser = {
+                id: "user-test-123",
+                name: "Usuário de Teste",
+                email: "teste@exemplo.com",
+                role: "admin"
+            };
+            
+            // Salvar no localStorage
+            localStorage.setItem('user', JSON.stringify(testUser));
+            console.log("Usuário de teste criado automaticamente");
+        }
+    </script>
+    
+    <script src="js/theme.js"></script>
     <script src="js/reports.js"></script>
 </body>
 </html>

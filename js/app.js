@@ -243,75 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Cria um card de ticket
-     * @param {Object} ticket - Dados do ticket
-     * @returns {HTMLElement} - Elemento do card
-     */
-    function createTicketCard(ticket) {
-        const card = document.createElement('div');
-        card.className = `ticket-card priority-${ticket.priority}`;
-        
-        // Formata as datas
-        let createdDate = 'Data indisponível';
-        try {
-            if (ticket.created_at) {
-                createdDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
-            }
-        } catch (error) {
-            console.error('Erro ao formatar data:', error);
-        }
-        
-        // Mapeia os status e prioridades para exibição
-        const statusMap = {
-            'open': 'Aberto',
-            'in-progress': 'Em Andamento',
-            'resolved': 'Resolvido'
-        };
-        
-        const priorityMap = {
-            'low': 'Baixa',
-            'medium': 'Média',
-            'high': 'Alta'
-        };
-        
-        card.innerHTML = `
-            <div class="ticket-header">
-                <h3 class="ticket-title">${ticket.title}</h3>
-            </div>
-            <div class="ticket-description">${ticket.description || 'Sem descrição'}</div>
-            <div class="ticket-meta">
-                <span class="ticket-status status-${ticket.status}">${statusMap[ticket.status]}</span>
-                <span class="ticket-priority priority-${ticket.priority}">${priorityMap[ticket.priority]}</span>
-            </div>
-            <div class="ticket-date">Criado em: ${createdDate}</div>
-            <div class="ticket-actions">
-                <button class="edit-btn" data-id="${ticket.id}">Editar</button>
-                ${ticket.status !== 'resolved' ? 
-                    `<button class="resolve-btn" data-id="${ticket.id}">Resolver</button>` : 
-                    ''}
-                <button class="delete-btn" data-id="${ticket.id}">Excluir</button>
-            </div>
-        `;
-        
-        // Adiciona event listeners aos botões
-        card.querySelector('.edit-btn').addEventListener('click', () => {
-            openTicketModal(ticket);
-        });
-        
-        if (ticket.status !== 'resolved') {
-            card.querySelector('.resolve-btn').addEventListener('click', () => {
-                resolveTicket(ticket.id);
-            });
-        }
-        
-        card.querySelector('.delete-btn').addEventListener('click', () => {
-            confirmDeleteTicket(ticket.id);
-        });
-        
-        return card;
-    }
-
-    /**
      * Filtra os tickets com base nos filtros selecionados
      */
     function filterTickets() {
@@ -507,8 +438,15 @@ document.addEventListener('DOMContentLoaded', () => {
      * Navega para a página de relatórios avançados
      */
     function navigateToAdvancedReports() {
-        // Redireciona para a página de relatórios avançados
-        window.location.href = 'advanced-reports.html';
+        // Salva o usuário atual no localStorage para manter a sessão
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        if (currentUser) {
+            // Redireciona para a página de relatórios avançados
+            window.location.href = '/advanced-reports.html';
+        } else {
+            // Se não houver usuário logado, redireciona para a página de login
+            window.location.href = '/login.html';
+        }
     }
 
     /**
@@ -541,6 +479,75 @@ document.addEventListener('DOMContentLoaded', () => {
         registerEmail.value = '';
         registerPassword.value = '';
         registerError.textContent = '';
+    }
+
+    /**
+     * Cria um card de ticket
+     * @param {Object} ticket - Dados do ticket
+     * @returns {HTMLElement} - Elemento do card
+     */
+    function createTicketCard(ticket) {
+        const card = document.createElement('div');
+        card.className = `ticket-card priority-${ticket.priority}`;
+        
+        // Formata as datas
+        let createdDate = 'Data indisponível';
+        try {
+            if (ticket.created_at) {
+                createdDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
+            }
+        } catch (error) {
+            console.error('Erro ao formatar data:', error);
+        }
+        
+        // Mapeia os status e prioridades para exibição
+        const statusMap = {
+            'open': 'Aberto',
+            'in-progress': 'Em Andamento',
+            'resolved': 'Resolvido'
+        };
+        
+        const priorityMap = {
+            'low': 'Baixa',
+            'medium': 'Média',
+            'high': 'Alta'
+        };
+        
+        card.innerHTML = `
+            <div class="ticket-header">
+                <h3 class="ticket-title">${ticket.title}</h3>
+            </div>
+            <div class="ticket-description">${ticket.description || 'Sem descrição'}</div>
+            <div class="ticket-meta">
+                <span class="ticket-status status-${ticket.status}">${statusMap[ticket.status]}</span>
+                <span class="ticket-priority priority-${ticket.priority}">${priorityMap[ticket.priority]}</span>
+            </div>
+            <div class="ticket-date">Criado em: ${createdDate}</div>
+            <div class="ticket-actions">
+                <button class="edit-btn" data-id="${ticket.id}">Editar</button>
+                ${ticket.status !== 'resolved' ? 
+                    `<button class="resolve-btn" data-id="${ticket.id}">Resolver</button>` : 
+                    ''}
+                <button class="delete-btn" data-id="${ticket.id}">Excluir</button>
+            </div>
+        `;
+        
+        // Adiciona event listeners aos botões
+        card.querySelector('.edit-btn').addEventListener('click', () => {
+            openTicketModal(ticket);
+        });
+        
+        if (ticket.status !== 'resolved') {
+            card.querySelector('.resolve-btn').addEventListener('click', () => {
+                resolveTicket(ticket.id);
+            });
+        }
+        
+        card.querySelector('.delete-btn').addEventListener('click', () => {
+            confirmDeleteTicket(ticket.id);
+        });
+        
+        return card;
     }
 
     // Inicializa a aplicação
