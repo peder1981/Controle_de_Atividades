@@ -1,6 +1,6 @@
 {
   "name": "controle-de-atividades",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Sistema de controle de atividades com armazenamento SQLite",
   "main": "server.js",
   "scripts": {
