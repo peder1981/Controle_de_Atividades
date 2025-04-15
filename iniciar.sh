@@ -31,7 +31,7 @@ PORTA=3000
 # Verifica se a porta está em uso
 if lsof -Pi :$PORTA -sTCP:LISTEN -t >/dev/null ; then
     echo -e "${AMARELO}A porta $PORTA já está em uso. Tentando a porta 8080...${SEM_COR}"
-    PORTA=8080
+    PORTA=3000
     
     if lsof -Pi :$PORTA -sTCP:LISTEN -t >/dev/null ; then
         echo -e "${AMARELO}A porta $PORTA também está em uso. Tentando a porta 9000...${SEM_COR}"

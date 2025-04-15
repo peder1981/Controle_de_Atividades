@@ -7,7 +7,7 @@ class DashboardManager {
         this.statusChart = null;
         this.priorityChart = null;
         this.timeMetricsChart = null;
-        this.apiUrl = 'http://localhost:3000/api';
+        this.apiUrl = 'http://localhost:9000/api';
     }
 
     /**

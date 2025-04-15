@@ -6,7 +6,7 @@ class AuthManager {
     constructor() {
         this.currentUser = null;
         this.sessionKey = 'ticketapp_session';
-        this.apiUrl = 'http://localhost:3000/api';
+        this.apiUrl = 'http://localhost:9000/api';
         this.init();
     }
 

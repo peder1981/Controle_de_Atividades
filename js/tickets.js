@@ -4,7 +4,7 @@
  */
 class TicketManager {
     constructor() {
-        this.apiUrl = 'http://localhost:3000/api';
+        this.apiUrl = 'http://localhost:9000/api';
         this.tickets = [];
     }
 
