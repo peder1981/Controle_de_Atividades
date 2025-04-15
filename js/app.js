@@ -28,6 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusFilter = document.getElementById('status-filter');
     const priorityFilter = document.getElementById('priority-filter');
     const goToDashboardBtn = document.getElementById('go-to-dashboard-btn');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
+    const startDateFilter = document.getElementById('start-date-filter');
+    const endDateFilter = document.getElementById('end-date-filter');
+    const exportFormat = document.getElementById('export-format');
 
     // Elementos da tela de dashboard
     const dashboardScreen = document.getElementById('dashboard-screen');
@@ -96,6 +100,20 @@ document.addEventListener('DOMContentLoaded', () => {
         statusFilter.addEventListener('change', filterTickets);
         priorityFilter.addEventListener('change', filterTickets);
         goToDashboardBtn.addEventListener('click', showDashboardScreen);
+        exportCsvBtn.addEventListener('click', () => {
+            const status = statusFilter.value;
+            const startDate = startDateFilter ? startDateFilter.value : '';
+            const endDate = endDateFilter ? endDateFilter.value : '';
+            const filtered = filterTicketsForExport(currentTickets, status, startDate, endDate);
+            const format = exportFormat ? exportFormat.value : 'csv';
+            if (format === 'csv') {
+                exportTicketsToCSV(filtered);
+            } else if (format === 'xlsx') {
+                exportTicketsToXLSX(filtered);
+            } else if (format === 'pdf') {
+                exportTicketsToPDF(filtered);
+            }
+        });
 
         // Event listeners da tela de dashboard
         goToTicketsBtn.addEventListener('click', showMainScreen);
@@ -232,75 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const ticketCard = createTicketCard(ticket);
             ticketsList.appendChild(ticketCard);
         });
-    }
-
-    /**
-     * Cria um card de ticket
-     * @param {Object} ticket - Dados do ticket
-     * @returns {HTMLElement} - Elemento do card
-     */
-    function createTicketCard(ticket) {
-        const card = document.createElement('div');
-        card.className = `ticket-card priority-${ticket.priority}`;
-        
-        // Formata as datas
-        let createdDate = 'Data indisponível';
-        try {
-            if (ticket.created_at) {
-                createdDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
-            }
-        } catch (error) {
-            console.error('Erro ao formatar data:', error);
-        }
-        
-        // Mapeia os status e prioridades para exibição
-        const statusMap = {
-            'open': 'Aberto',
-            'in-progress': 'Em Andamento',
-            'resolved': 'Resolvido'
-        };
-        
-        const priorityMap = {
-            'low': 'Baixa',
-            'medium': 'Média',
-            'high': 'Alta'
-        };
-        
-        card.innerHTML = `
-            <div class="ticket-header">
-                <h3 class="ticket-title">${ticket.title}</h3>
-            </div>
-            <div class="ticket-description">${ticket.description || 'Sem descrição'}</div>
-            <div class="ticket-meta">
-                <span class="ticket-status status-${ticket.status}">${statusMap[ticket.status]}</span>
-                <span class="ticket-priority priority-${ticket.priority}">${priorityMap[ticket.priority]}</span>
-            </div>
-            <div class="ticket-date">Criado em: ${createdDate}</div>
-            <div class="ticket-actions">
-                <button class="edit-btn" data-id="${ticket.id}">Editar</button>
-                ${ticket.status !== 'resolved' ? 
-                    `<button class="resolve-btn" data-id="${ticket.id}">Resolver</button>` : 
-                    ''}
-                <button class="delete-btn" data-id="${ticket.id}">Excluir</button>
-            </div>
-        `;
-        
-        // Adiciona event listeners aos botões
-        card.querySelector('.edit-btn').addEventListener('click', () => {
-            openTicketModal(ticket);
-        });
-        
-        if (ticket.status !== 'resolved') {
-            card.querySelector('.resolve-btn').addEventListener('click', () => {
-                resolveTicket(ticket.id);
-            });
-        }
-        
-        card.querySelector('.delete-btn').addEventListener('click', () => {
-            confirmDeleteTicket(ticket.id);
-        });
-        
-        return card;
     }
 
     /**
@@ -518,6 +467,219 @@ document.addEventListener('DOMContentLoaded', () => {
         registerPassword.value = '';
         registerError.textContent = '';
     }
+
+    /**
+     * Cria um card de ticket
+     * @param {Object} ticket - Dados do ticket
+     * @returns {HTMLElement} - Elemento do card
+     */
+    function createTicketCard(ticket) {
+        const card = document.createElement('div');
+        card.className = `ticket-card priority-${ticket.priority}`;
+        
+        // Formata as datas
+        let createdDate = 'Data indisponível';
+        try {
+            if (ticket.created_at) {
+                createdDate = new Date(ticket.created_at).toLocaleDateString('pt-BR');
+            }
+        } catch (error) {
+            console.error('Erro ao formatar data:', error);
+        }
+        
+        // Mapeia os status e prioridades para exibição
+        const statusMap = {
+            'open': 'Aberto',
+            'in-progress': 'Em Andamento',
+            'resolved': 'Resolvido'
+        };
+        
+        const priorityMap = {
+            'low': 'Baixa',
+            'medium': 'Média',
+            'high': 'Alta'
+        };
+        
+        card.innerHTML = `
+            <div class="ticket-header">
+                <h3 class="ticket-title">${ticket.title}</h3>
+            </div>
+            <div class="ticket-description">${ticket.description || 'Sem descrição'}</div>
+            <div class="ticket-meta">
+                <span class="ticket-status status-${ticket.status}">${statusMap[ticket.status]}</span>
+                <span class="ticket-priority priority-${ticket.priority}">${priorityMap[ticket.priority]}</span>
+            </div>
+            <div class="ticket-date">Criado em: ${createdDate}</div>
+            <div class="ticket-actions">
+                <button class="edit-btn" data-id="${ticket.id}">Editar</button>
+                ${ticket.status !== 'resolved' ? 
+                    `<button class="resolve-btn" data-id="${ticket.id}">Resolver</button>` : 
+                    ''}
+                <button class="delete-btn" data-id="${ticket.id}">Excluir</button>
+            </div>
+        `;
+        
+        // Adiciona event listeners aos botões
+        card.querySelector('.edit-btn').addEventListener('click', () => {
+            openTicketModal(ticket);
+        });
+        
+        if (ticket.status !== 'resolved') {
+            card.querySelector('.resolve-btn').addEventListener('click', () => {
+                resolveTicket(ticket.id);
+            });
+        }
+        
+        card.querySelector('.delete-btn').addEventListener('click', () => {
+            confirmDeleteTicket(ticket.id);
+        });
+        
+        return card;
+    }
+
+    /**
+     * Função utilitária para converter tickets em CSV
+     */
+    function exportTicketsToCSV(tickets) {
+        if (!tickets || tickets.length === 0) {
+            alert('Nenhum ticket para exportar.');
+            return;
+        }
+        // Cabeçalhos CSV
+        const headers = Object.keys(tickets[0]);
+        const csvRows = [headers.join(';')];
+        // Dados
+        tickets.forEach(ticket => {
+            const row = headers.map(h => {
+                let val = ticket[h];
+                if (val === null || val === undefined) return '';
+                return String(val).replace(/;/g, ',').replace(/\n/g, ' ');
+            });
+            csvRows.push(row.join(';'));
+        });
+        const csvContent = '\uFEFF' + csvRows.join('\n'); // BOM para Excel
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `tickets_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Função utilitária para exportar tickets em XLSX
+     */
+    function exportTicketsToXLSX(tickets) {
+        if (!tickets || tickets.length === 0) {
+            alert('Nenhum ticket para exportar.');
+            return;
+        }
+        const ws = XLSX.utils.json_to_sheet(tickets);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Tickets');
+        XLSX.writeFile(wb, `tickets_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    /**
+     * Função utilitária para exportar tickets em PDF
+     */
+    function exportTicketsToPDF(tickets) {
+        if (!tickets || tickets.length === 0) {
+            alert('Nenhum ticket para exportar.');
+            return;
+        }
+        const doc = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'pt', format: 'A4' });
+        // Selecionar apenas colunas relevantes
+        const columns = [
+            { header: 'Título', dataKey: 'title' },
+            { header: 'Descrição', dataKey: 'description' },
+            { header: 'Status', dataKey: 'status' },
+            { header: 'Prioridade', dataKey: 'priority' },
+            { header: 'Criado em', dataKey: 'created_at' }
+        ];
+        const rows = tickets.map(t => {
+            const row = {};
+            columns.forEach(col => {
+                let val = t[col.dataKey];
+                if (col.dataKey === 'created_at' && val) {
+                    try { val = new Date(val).toLocaleString('pt-BR'); } catch(e){}
+                }
+                row[col.dataKey] = val !== undefined && val !== null ? String(val) : '';
+            });
+            return row;
+        });
+        doc.setFontSize(16);
+        doc.text('Exportação de Tickets', 40, 40);
+        doc.setFontSize(10);
+        doc.text('Data: ' + new Date().toLocaleString('pt-BR'), 40, 58);
+        if (doc.autoTable) {
+            doc.autoTable({
+                head: [columns.map(c => c.header)],
+                body: rows.map(row => columns.map(c => row[c.dataKey])),
+                startY: 70,
+                styles: { fontSize: 10, cellPadding: 4, overflow: 'linebreak' },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle', rotation: 0 },
+                columnStyles: {
+                    description: { cellWidth: 320, minCellHeight: 24, valign: 'top', halign: 'left' },
+                    title: { cellWidth: 120, halign: 'left' },
+                    status: { cellWidth: 70, halign: 'center' },
+                    priority: { cellWidth: 70, halign: 'center' },
+                    created_at: { cellWidth: 100, halign: 'center' }
+                },
+                alternateRowStyles: { fillColor: [245, 245, 245] },
+                margin: { left: 40, right: 40 },
+                didDrawPage: function (data) {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFontSize(9);
+                    doc.text(`Página ${doc.internal.getCurrentPageInfo().pageNumber} de ${pageCount}`,
+                        doc.internal.pageSize.getWidth() - 100, doc.internal.pageSize.getHeight() - 20);
+                }
+            });
+        } else {
+            alert('Biblioteca jsPDF-AutoTable não carregada.');
+            return;
+        }
+        doc.save(`tickets_${new Date().toISOString().slice(0,10)}.pdf`);
+    }
+
+    /**
+     * Função para filtrar tickets por data e status
+     */
+    function filterTicketsForExport(tickets, status, startDate, endDate) {
+        return tickets.filter(ticket => {
+            let statusMatch = status === 'all' || ticket.status === status;
+            let dateMatch = true;
+            if (startDate) {
+                dateMatch = dateMatch && new Date(ticket.created_at) >= new Date(startDate);
+            }
+            if (endDate) {
+                dateMatch = dateMatch && new Date(ticket.created_at) <= new Date(endDate);
+            }
+            return statusMatch && dateMatch;
+        });
+    }
+
+    // Adiciona campos de filtro de data na interface
+    (function injectDateFilters() {
+        const filterDiv = document.querySelector('.tickets-filter');
+        if (filterDiv && !document.getElementById('start-date-filter')) {
+            const startInput = document.createElement('input');
+            startInput.type = 'date';
+            startInput.id = 'start-date-filter';
+            startInput.className = 'date-filter';
+            startInput.style.marginLeft = '8px';
+            const endInput = document.createElement('input');
+            endInput.type = 'date';
+            endInput.id = 'end-date-filter';
+            endInput.className = 'date-filter';
+            endInput.style.marginLeft = '4px';
+            filterDiv.appendChild(startInput);
+            filterDiv.appendChild(endInput);
+        }
+    })();
 
     // Inicializa a aplicação
     init();

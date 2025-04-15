@@ -1,6 +1,6 @@
 # Controle de Atividades
 
-![Versão](https://img.shields.io/badge/versão-2.1.0-blue)
+![Versão](https://img.shields.io/badge/versão-2.2.0-blue)
 ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
 Uma aplicação web para gerenciamento de tickets e tarefas com armazenamento em banco de dados SQLite. Ideal para organização pessoal com persistência de dados.
@@ -107,7 +107,7 @@ Antes de fazer commit para o GitHub, certifique-se de:
 Organize seus commits de forma lógica:
 ```bash
 git add .
-git commit -m "Versão 2.1.0: Adicionados dashboards de tempo médio e melhorias"
+git commit -m "Versão 2.2.0: Adicionados dashboards de tempo médio e melhorias"
 git push origin main
 ```
 
@@ -148,6 +148,11 @@ controle-de-atividades/
 
 ## 🛠️ Correções Recentes
 
+### Versão 2.2.0 (15/04/2025)
+- Exportação de tickets para CSV, XLSX e PDF
+- PDF com tabela elegante, colunas principais e descrição com quebra de linha
+- Ajuste de layout e filtros para exportação
+
 ### Versão 2.1.0 (12/04/2025)
 - Adicionados três novos dashboards de métricas de tempo:
   - Tempo médio entre abertura e início do andamento
@@ -179,3 +184,20 @@ Funcionalidades planejadas para versões futuras:
 ---
 
 Desenvolvido com ❤️ para simplificar o gerenciamento de tarefas diárias.
+
+## 📤 Exportação de Tickets
+
+Agora é possível exportar os tickets filtrados por status e data diretamente da interface para os formatos:
+- **CSV** (compatível com Excel e LibreOffice)
+- **XLSX** (Excel)
+- **PDF** (tabela elegante e pronta para impressão)
+
+### Como funciona
+- Utilize os filtros de status e data para refinar os tickets.
+- Escolha o formato desejado ao lado do botão "Exportar".
+- Clique em **Exportar** para baixar o arquivo.
+- O PDF possui tabela com colunas: Título, Descrição (com quebra de linha), Status, Prioridade e Data de Criação.
+
+#### Tecnologias utilizadas na exportação
+- [SheetJS (xlsx)](https://sheetjs.com/) para XLSX
+- [jsPDF](https://github.com/parallax/jsPDF) e [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable) para PDF

@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS para XLSX -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jsPDF-AutoTable para tabelas elegantes no PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -65,6 +71,14 @@
                 <div class="tickets-header">
                     <h2>Meus Tickets</h2>
                     <button id="new-ticket-btn" class="primary-btn"><i class="fas fa-plus"></i> Novo Ticket</button>
+                    <div class="export-group">
+                        <button id="export-csv-btn" class="primary-btn"><i class="fas fa-file-csv"></i> Exportar</button>
+                        <select id="export-format" class="export-select">
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">XLSX</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="tickets-filter">
