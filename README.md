@@ -1,5 +1,6 @@
 # Controle de Atividades
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4%EF%B8%8F-blue?style=for-the-badge)](https://github.com/sponsors/peder1981)
 ![Versão](https://img.shields.io/badge/versão-2.2.0-blue)
 ![Licença](https://img.shields.io/badge/licença-MIT-green)
 
