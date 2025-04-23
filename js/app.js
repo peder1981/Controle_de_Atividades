@@ -101,10 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
         priorityFilter.addEventListener('change', filterTickets);
         goToDashboardBtn.addEventListener('click', showDashboardScreen);
         exportCsvBtn.addEventListener('click', () => {
-            const status = statusFilter.value;
+            const statusValues = Array.from(statusFilter.selectedOptions).map(opt => opt.value);
+            const priorityValues = Array.from(priorityFilter.selectedOptions).map(opt => opt.value);
             const startDate = startDateFilter ? startDateFilter.value : '';
             const endDate = endDateFilter ? endDateFilter.value : '';
-            const filtered = filterTicketsForExport(currentTickets, status, startDate, endDate);
+            const filtered = filterTicketsForExport(
+                currentTickets,
+                statusValues,
+                priorityValues,
+                startDate,
+                endDate
+            );
             const format = exportFormat ? exportFormat.value : 'csv';
             if (format === 'csv') {
                 exportTicketsToCSV(filtered);
@@ -227,14 +234,14 @@ document.addEventListener('DOMContentLoaded', () => {
      * Renderiza os tickets na tela
      */
     function renderTickets() {
-        const statusValue = statusFilter.value;
-        const priorityValue = priorityFilter.value;
+        const statusValues = Array.from(statusFilter.selectedOptions).map(opt => opt.value);
+        const priorityValues = Array.from(priorityFilter.selectedOptions).map(opt => opt.value);
         
         // Filtra os tickets
         const filteredTickets = ticketManager.filterTickets(
             currentTickets,
-            statusValue,
-            priorityValue
+            statusValues,
+            priorityValues
         );
         
         // Limpa a lista
@@ -646,11 +653,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Função para filtrar tickets por data e status
+     * Função para filtrar tickets por status, prioridade e data
      */
-    function filterTicketsForExport(tickets, status, startDate, endDate) {
+    function filterTicketsForExport(tickets, statuses, priorities, startDate, endDate) {
+        const statusArray = Array.isArray(statuses) ? statuses : [statuses];
+        const priorityArray = Array.isArray(priorities) ? priorities : [priorities];
         return tickets.filter(ticket => {
-            let statusMatch = status === 'all' || ticket.status === status;
+            const statusMatch = statusArray.includes('all') || statusArray.includes(ticket.status);
+            const priorityMatch = priorityArray.includes('all') || priorityArray.includes(ticket.priority);
             let dateMatch = true;
             if (startDate) {
                 dateMatch = dateMatch && new Date(ticket.created_at) >= new Date(startDate);
@@ -658,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (endDate) {
                 dateMatch = dateMatch && new Date(ticket.created_at) <= new Date(endDate);
             }
-            return statusMatch && dateMatch;
+            return statusMatch && priorityMatch && dateMatch;
         });
     }
 

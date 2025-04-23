@@ -144,14 +144,17 @@ class TicketManager {
     /**
      * Filtra tickets por status e/ou prioridade
      * @param {Array} tickets - Lista de tickets para filtrar
-     * @param {string} status - Status para filtrar (opcional)
-     * @param {string} priority - Prioridade para filtrar (opcional)
+     * @param {Array|string} statuses - Statuses para filtrar (opcional)
+     * @param {Array|string} priorities - Prioridades para filtrar (opcional)
      * @returns {Array} - Lista de tickets filtrados
      */
-    filterTickets(tickets, status, priority) {
+    filterTickets(tickets, statuses, priorities) {
+        // Normalize parameters to arrays
+        const statusArray = Array.isArray(statuses) ? statuses : [statuses];
+        const priorityArray = Array.isArray(priorities) ? priorities : [priorities];
         return tickets.filter(ticket => {
-            const statusMatch = status === 'all' || ticket.status === status;
-            const priorityMatch = priority === 'all' || ticket.priority === priority;
+            const statusMatch = statusArray.includes('all') || statusArray.includes(ticket.status);
+            const priorityMatch = priorityArray.includes('all') || priorityArray.includes(ticket.priority);
             return statusMatch && priorityMatch;
         });
     }
